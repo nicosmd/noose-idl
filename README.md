@@ -1,1 +1,1 @@
-# noose-idl
+# NoOS for embedded - IDL
