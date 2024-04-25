@@ -19,12 +19,12 @@ import sys
 from catkin_pkg.package import package_exists_at
 from catkin_pkg.package import parse_package
 
-from rosidl_adapter.action import convert_action_to_idl
-from rosidl_adapter.msg import convert_msg_to_idl
-from rosidl_adapter.srv import convert_srv_to_idl
+from rosidl.rosidl_adapter.action import convert_action_to_idl
+from rosidl.rosidl_adapter.msg import convert_msg_to_idl
+from rosidl.rosidl_adapter.srv import convert_srv_to_idl
 
-from rosidl_cli.command.helpers import interface_path_as_tuple
-from rosidl_cli.command.translate.extensions import TranslateCommandExtension
+from rosidl.rosidl_cli.command.helpers import interface_path_as_tuple
+from rosidl.rosidl_cli.command.translate.extensions import TranslateCommandExtension
 
 
 def convert_files_to_idl(extension, conversion_function, argv=sys.argv[1:]):

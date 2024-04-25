@@ -1,10 +1,10 @@
-@#typedefs for arrays need to be defined outside of the struct
+_template = """@#typedefs for arrays need to be defined outside of the struct
 @{
 from collections import OrderedDict
 
-from rosidl_adapter.msg import get_idl_type
-from rosidl_adapter.msg import to_idl_literal
-from rosidl_adapter.msg import string_to_idl_string_literal
+from rosidl.rosidl_adapter.msg import get_idl_type
+from rosidl.rosidl_adapter.msg import to_idl_literal
+from rosidl.rosidl_adapter.msg import string_to_idl_string_literal
 
 typedefs = OrderedDict()
 def get_idl_type_identifier(idl_type):
@@ -101,3 +101,7 @@ idl_type = get_idl_type_identifier(idl_type)
       uint8 structure_needs_at_least_one_member;
 @[end if]@
     };
+"""
+
+def get_template():
+    return _template

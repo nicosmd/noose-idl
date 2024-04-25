@@ -18,6 +18,8 @@ import sys
 
 import em
 
+from rosidl.resource import rosidl_adapter as resources
+
 
 def expand_template(template_name, data, output_file, encoding='utf-8'):
     content = evaluate_template(template_name, data)
@@ -41,8 +43,6 @@ def evaluate_template(template_name, data):
     data = dict(data)
     data['TEMPLATE'] = _evaluate_template
 
-    template_path = os.path.join(os.path.dirname(__file__), template_name)
-
     output = StringIO()
     try:
         _interpreter = em.Interpreter(
@@ -52,12 +52,8 @@ def evaluate_template(template_name, data):
                 em.RAW_OPT: True,
             })
 
-        with open(template_path, 'r') as h:
-            content = h.read()
-        _interpreter.invoke(
-            'beforeFile', name=template_name, file=h, locals=data)
-        _interpreter.string(content, template_path, locals=data)
-        _interpreter.invoke('afterFile')
+        content = resources.get_template(template_name)
+        _interpreter.string(content, locals=data)
 
         return output.getvalue()
     except Exception as e:  # noqa: F841
@@ -72,16 +68,11 @@ def evaluate_template(template_name, data):
 
 def _evaluate_template(template_name, **kwargs):
     global _interpreter
-    template_path = os.path.join(os.path.dirname(__file__), template_name)
-    with open(template_path, 'r') as h:
-        _interpreter.invoke(
-            'beforeInclude', name=template_path, file=h, locals=kwargs)
-        content = h.read()
+    content = resources.get_template(template_name)
     try:
-        _interpreter.string(content, template_path, kwargs)
+        _interpreter.string(content, locals=kwargs)
     except Exception as e:  # noqa: F841
         print(
             f"{e.__class__.__name__} processing template '{template_name}': "
             f'{e}', file=sys.stderr)
         sys.exit(1)
-    _interpreter.invoke('afterInclude')

@@ -19,7 +19,7 @@ import pathlib
 import sys
 
 
-from rosidl_adapter import convert_to_idl
+from rosidl.rosidl_adapter import convert_to_idl
 
 
 def main(argv=sys.argv[1:]):
