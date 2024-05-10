@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from io import StringIO
+import importlib
 import json
 import os
 import pathlib
@@ -20,8 +21,8 @@ import re
 import sys
 
 import em
-from rosidl_parser.definition import IdlLocator
-from rosidl_parser.parser import parse_idl_file
+from rosidl.rosidl_parser.definition import IdlLocator
+from rosidl.rosidl_parser.parser import parse_idl_file
 
 
 def convert_camel_case_to_lower_case_underscore(value):
@@ -48,9 +49,60 @@ def get_newest_modification_time(target_dependencies):
     return newest_timestamp
 
 
+def generate_files_noose(file_list, mapping, generator_name, package_name, output_dir, type_description_map=None,
+                         additional_context=None):
+    generated_files = []
+
+    latest_target_timestamp = get_newest_modification_time(file_list)
+
+    for idl_file_path_string in file_list:
+        type_description_info = None
+
+        idl_file_path = pathlib.Path(idl_file_path_string)
+        idl_stem = idl_file_path.stem.lower()
+        locator = IdlLocator(str(idl_file_path.parent), str(idl_file_path.name))
+        rosidl_type_string = idl_file_path.parent.parts[-1]
+
+        idl_rel_path = pathlib.Path(rosidl_type_string) / idl_file_path.name
+
+        if type_description_map is not None:
+            type_hash_file = type_description_map[str(idl_rel_path)]
+            with open(type_hash_file, 'r') as f:
+                type_description_info = json.load(f)
+
+        type_source_file = idl_file_path
+
+        try:
+            idl_file = parse_idl_file(locator)
+            for template_file, generated_filename in mapping.items():
+                generated_file = os.path.join(
+                    output_dir,
+                    generated_filename % idl_stem)
+                generated_files.append(generated_file)
+                data = {
+                    'package_name': package_name,
+                    'interface_path': idl_rel_path,
+                    'content': idl_file.content,
+                    'type_description_info': type_description_info,
+                    'type_source_file': type_source_file,
+                }
+                if additional_context is not None:
+                    data.update(additional_context)
+                expand_template(
+                    os.path.basename(template_file), data,
+                    generated_file, generator_name, minimum_timestamp=latest_target_timestamp)
+        except Exception as e:
+            print(
+                'Error processing idl file: ' +
+                str(locator.get_absolute_path()), file=sys.stderr)
+            raise e
+
+    return generated_files
+
+
 def generate_files(
-    generator_arguments_file, mapping, additional_context=None,
-    keep_case=False, post_process_callback=None
+        generator_arguments_file, mapping, additional_context=None,
+        keep_case=False, post_process_callback=None
 ):
     args = read_generator_arguments(generator_arguments_file)
 
@@ -68,7 +120,7 @@ def generate_files(
         assert len(tuple_parts) == 2
         type_description_files[tuple_parts[0]] = tuple_parts[1]
     ros_interface_files = {}
-    for ros_interface_file in args.get('ros_interface_files',  []):
+    for ros_interface_file in args.get('ros_interface_files', []):
         p = pathlib.Path(ros_interface_file)
         # e.g. ('msg', 'Empty')
         key = (p.suffix[1:], p.stem)
@@ -121,31 +173,21 @@ def generate_files(
     return generated_files
 
 
-template_prefix_path = []
+template_generator_name = []
 
 
-def get_template_path(template_name):
-    global template_prefix_path
-    for basepath in template_prefix_path:
-        template_path = basepath / template_name
-        if template_path.exists():
-            return template_path
-    raise RuntimeError(f"Failed to find template '{template_name}'")
+def get_generator_name():
+    global template_generator_name
+    return template_generator_name[-1]
 
 
 interpreter = None
 
 
 def expand_template(
-    template_name, data, output_file, minimum_timestamp=None,
-    template_basepath=None, post_process_callback=None
+        template_name, data, output_file, generator_name, minimum_timestamp=None,
+        post_process_callback=None
 ):
-    # in the legacy API the first argument was the path to the template
-    if template_basepath is None:
-        template_name = pathlib.Path(template_name)
-        template_basepath = template_name.parent
-        template_name = template_name.name
-
     global interpreter
     output = StringIO()
     interpreter = em.Interpreter(
@@ -156,21 +198,17 @@ def expand_template(
         },
     )
 
-    global template_prefix_path
-    template_prefix_path.append(template_basepath)
-    template_path = get_template_path(template_name)
+    global template_generator_name
+    template_generator_name.append(generator_name)
 
     # create copy before manipulating
     data = dict(data)
     _add_helper_functions(data)
 
     try:
-        with template_path.open('r') as h:
-            template_content = h.read()
-            interpreter.invoke(
-                'beforeFile', name=template_name, file=h, locals=data)
-        interpreter.string(template_content, template_path, locals=data)
-        interpreter.invoke('afterFile')
+        template_module = importlib.import_module(f"rosidl.resource.{generator_name}")
+        template_content = template_module.get_template(template_name)
+        interpreter.string(template_content, locals=data)
     except Exception as e:  # noqa: F841
         if os.path.exists(output_file):
             os.remove(output_file)
@@ -178,7 +216,7 @@ def expand_template(
               f"'{output_file}': {e}", file=sys.stderr)
         raise
     finally:
-        template_prefix_path.pop()
+        template_generator_name.pop()
 
     content = output.getvalue()
     interpreter.shutdown()
@@ -211,16 +249,14 @@ def _add_helper_functions(data):
 
 def _expand_template(template_name, **kwargs):
     global interpreter
-    template_path = get_template_path(template_name)
+    generator_name = get_generator_name()
+    template_module = importlib.import_module(f"rosidl.resource.{generator_name}")
+    template_content = template_module.get_template(template_name)
+
     _add_helper_functions(kwargs)
-    with template_path.open('r') as h:
-        interpreter.invoke(
-            'beforeInclude', name=str(template_path), file=h, locals=kwargs)
-        content = h.read()
     try:
-        interpreter.string(content, str(template_path), kwargs)
+        interpreter.string(template_content, locals=kwargs)
     except Exception as e:  # noqa: F841
-        print(f"{e.__class__.__name__} in template '{template_path}': {e}",
+        print(f"{e.__class__.__name__} in template '{template_name}': {e}",
               file=sys.stderr)
         raise
-    interpreter.invoke('afterInclude')

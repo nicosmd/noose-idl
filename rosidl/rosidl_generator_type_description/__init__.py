@@ -20,8 +20,8 @@ import re
 import sys
 from typing import List, Tuple
 
-from rosidl_parser import definition
-from rosidl_parser.parser import parse_idl_file
+from rosidl.rosidl_parser import definition
+from rosidl.rosidl_parser.parser import parse_idl_file
 
 # RIHS: ROS Interface Hashing Standard, per REP-2011
 # NOTE: These values and implementations must be updated if
@@ -45,7 +45,7 @@ def to_type_name(namespaced_type):
 
 class GenericInterface:
     def __init__(
-        self, namespaced_type: definition.NamespacedType, members: List[definition.Member]
+            self, namespaced_type: definition.NamespacedType, members: List[definition.Member]
     ):
         self.namespaced_type = namespaced_type
         self.members = members
@@ -137,8 +137,122 @@ def generate_type_hash(generator_arguments_file: str) -> List[str]:
             if isinstance(member.type, definition.NamespacedType):
                 member_type = member.type
             elif (
-                isinstance(member.type, definition.AbstractNestedType) and
-                isinstance(member.type.value_type, definition.NamespacedType)
+                    isinstance(member.type, definition.AbstractNestedType) and
+                    isinstance(member.type.value_type, definition.NamespacedType)
+            ):
+                member_type = member.type.value_type
+            else:
+                continue
+
+            if to_type_name(member_type) not in individual_types:
+                pending_includes.add(Path(*member_type.namespaced_name()))
+
+    # Load all included types, create lookup maps of included individual descriptions and hashes
+    serialized_type_lookup = {
+        key: serialize_individual_type_description(val.namespaced_type, val.members)
+        for key, val in individual_types.items()
+    }
+    hash_lookup = {}
+    while pending_includes:
+        process_include = pending_includes.pop()
+        p_path = process_include.with_suffix('.json')
+        pkg = p_path.parts[0]
+        pkg_dir = include_map[pkg]
+        include_path = pkg_dir / p_path.relative_to(pkg)
+        with include_path.open('r') as include_file:
+            include_json = json.load(include_file)
+
+        type_description_msg = include_json['type_description_msg']
+        try:
+            hash_lookup.update({
+                val['type_name']: val['hash_string'] for val in include_json['type_hashes']
+            })
+        except KeyError:
+            raise Exception(f'Key "type_hashes" not  found in {include_path}')
+
+        serialized_type_lookup[type_description_msg['type_description']['type_name']] = \
+            type_description_msg['type_description']
+        for referenced_type in type_description_msg['referenced_type_descriptions']:
+            serialized_type_lookup[referenced_type['type_name']] = referenced_type
+
+    # Create fully-unrolled TypeDescription instances for local full types, and calculate hashes
+    full_types = []
+    for type_name, individual_type in individual_types.items():
+        full_type_description = extract_full_type_description(type_name, serialized_type_lookup)
+        full_types.append(full_type_description)
+        hash_lookup[type_name] = calculate_type_hash(full_type_description)
+
+    # Write JSON output for each full TypeDescription
+    generated_files = []
+    for full_type_description in full_types:
+        top_type_name = full_type_description['type_description']['type_name']
+        hashes = [{
+            'type_name': top_type_name,
+            'hash_string': hash_lookup[top_type_name],
+        }]
+        for referenced_type in full_type_description['referenced_type_descriptions']:
+            hashes.append({
+                'type_name': referenced_type['type_name'],
+                'hash_string': hash_lookup[referenced_type['type_name']],
+            })
+        json_content = {
+            'type_description_msg': full_type_description,
+            'type_hashes': hashes,
+        }
+        rel_path = Path(*top_type_name.split('/')[1:])
+        json_path = output_dir / rel_path.with_suffix('.json')
+        with json_path.open('w', encoding='utf-8') as json_file:
+            json_file.write(json.dumps(json_content, indent=2))
+        generated_files.append(json_path)
+
+    return generated_files
+
+
+def generate_type_hash_noose(package_name, output_dir, idl_file_list, include_paths=None) -> List[str]:
+    # Lookup for directory containing dependency .json files
+    if include_paths is None:
+        include_paths = {}
+
+    include_map = {
+        package_name: output_dir
+    }
+
+    include_map.update(include_paths)
+
+    # Define all local IndividualTypeDescriptions
+    individual_types = {}
+    for idl_file_path_string in idl_file_list:
+        idl_file_path = Path(idl_file_path_string)
+        idl_stem = idl_file_path.stem.lower()
+        locator = definition.IdlLocator(str(idl_file_path.parent), str(idl_file_path.name))
+        rosidl_type_string = idl_file_path.parent.parts[-1]
+        try:
+            idl_file = parse_idl_file(locator)
+        except Exception as e:
+            print('Error processing idl file: ' +
+                  str(locator.get_absolute_path()), file=sys.stderr)
+            raise e
+
+        idl_rel_path = Path(rosidl_type_string) / idl_file_path.name
+        generate_to_dir = (output_dir / idl_rel_path).parent
+        generate_to_dir.mkdir(parents=True, exist_ok=True)
+        for el in idl_file.content.elements:
+            if isinstance(el, definition.Message):
+                add_msg(el, individual_types)
+            elif isinstance(el, definition.Service):
+                add_srv(el, individual_types)
+            elif isinstance(el, definition.Action):
+                add_action(el, individual_types)
+
+    # Determine needed includes for types from other packages
+    pending_includes = set()
+    for individual_type in individual_types.values():
+        for member in individual_type.members:
+            if isinstance(member.type, definition.NamespacedType):
+                member_type = member.type
+            elif (
+                    isinstance(member.type, definition.AbstractNestedType) and
+                    isinstance(member.type.value_type, definition.NamespacedType)
             ):
                 member_type = member.type.value_type
             else:
@@ -387,8 +501,8 @@ def field_type_type_name(ftype: definition.AbstractType) -> str:
     elif isinstance(value_type, definition.AbstractGenericString):
         value_type_name = FIELD_VALUE_TYPE_NAMES[type(value_type)]
     elif (
-        isinstance(value_type, definition.NamespacedType) or
-        isinstance(value_type, definition.NamedType)
+            isinstance(value_type, definition.NamespacedType) or
+            isinstance(value_type, definition.NamedType)
     ):
         value_type_name = 'FIELD_TYPE_NESTED_TYPE'
     else:
@@ -456,7 +570,7 @@ def serialize_field(member: definition.Member) -> dict:
 
 
 def serialize_individual_type_description(
-    namespaced_type: definition.NamespacedType, members: List[definition.Member]
+        namespaced_type: definition.NamespacedType, members: List[definition.Member]
 ) -> dict:
     return {
         'type_name': to_type_name(namespaced_type),

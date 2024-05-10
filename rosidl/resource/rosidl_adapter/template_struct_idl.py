@@ -1,4 +1,4 @@
-_template = """@#typedefs for arrays need to be defined outside of the struct
+_template = r"""@#typedefs for arrays need to be defined outside of the struct
 @{
 from collections import OrderedDict
 

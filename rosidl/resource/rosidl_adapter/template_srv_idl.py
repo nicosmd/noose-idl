@@ -1,12 +1,11 @@
-_template = r"""
-// generated from rosidl_adapter/resource/msg.idl.em
+_template = r"""// generated from rosidl_adapter/resource/srv.idl.em
 // with input from @(pkg_name)/@(relative_input_file)
 // generated code does not contain a copyright notice
 
 @{
 from rosidl.rosidl_adapter.msg import get_include_file
 include_files = set()
-for field in msg.fields:
+for field in srv.request.fields + srv.response.fields:
     include_file = get_include_file(field.type)
     if include_file is not None:
         include_files.add(include_file)
@@ -16,17 +15,22 @@ for field in msg.fields:
 @[end for]@
 
 module @(pkg_name) {
-  module msg {
+  module srv {
 @{
 TEMPLATE(
     'struct.idl.em',
-    msg=msg,
+    msg=srv.request,
+)
+}@
+@{
+TEMPLATE(
+    'struct.idl.em',
+    msg=srv.response,
 )
 }@
   };
 };
 """
-
 
 def get_template():
     return _template

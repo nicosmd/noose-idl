@@ -14,18 +14,18 @@
 
 from ast import literal_eval
 
-from rosidl_parser.definition import AbstractGenericString
-from rosidl_parser.definition import AbstractNestedType
-from rosidl_parser.definition import AbstractSequence
-from rosidl_parser.definition import AbstractString
-from rosidl_parser.definition import AbstractWString
-from rosidl_parser.definition import Array
-from rosidl_parser.definition import BasicType
-from rosidl_parser.definition import BoundedSequence
-from rosidl_parser.definition import FLOATING_POINT_TYPES
-from rosidl_parser.definition import NamespacedType
-from rosidl_parser.definition import UnboundedSequence
-from rosidl_pycommon import generate_files
+from rosidl.rosidl_parser.definition import AbstractGenericString
+from rosidl.rosidl_parser.definition import AbstractNestedType
+from rosidl.rosidl_parser.definition import AbstractSequence
+from rosidl.rosidl_parser.definition import AbstractString
+from rosidl.rosidl_parser.definition import AbstractWString
+from rosidl.rosidl_parser.definition import Array
+from rosidl.rosidl_parser.definition import BasicType
+from rosidl.rosidl_parser.definition import BoundedSequence
+from rosidl.rosidl_parser.definition import FLOATING_POINT_TYPES
+from rosidl.rosidl_parser.definition import NamespacedType
+from rosidl.rosidl_parser.definition import UnboundedSequence
+from rosidl.rosidl_pycommon import generate_files
 
 
 def generate_cpp(generator_arguments_file):
