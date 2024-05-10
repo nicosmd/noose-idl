@@ -76,7 +76,7 @@ def generate_files_noose(file_list, mapping, generator_name, package_name, outpu
             idl_file = parse_idl_file(locator)
             for template_file, generated_filename in mapping.items():
                 generated_file = os.path.join(
-                    output_dir,
+                    output_dir, rosidl_type_string,
                     generated_filename % idl_stem)
                 generated_files.append(generated_file)
                 data = {

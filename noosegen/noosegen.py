@@ -160,7 +160,7 @@ def map_idl_paths_to_type_description_paths(idl_file_paths, type_description_pat
 def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(description='Noose IDL Generator')
     parser.add_argument('--package-name', required=True, help='The name of the package name')
-    parser.add_argument('--input', required=True,
+    parser.add_argument('--input', required=True, nargs='+',
                         help='Noose IDL input file.')
     parser.add_argument('--cpp-output-dir', help='generated C++ code output directory.', default='generated')
     parser.add_argument('--idl-output-dir', help='idl output directory.', default='idl')
@@ -169,25 +169,25 @@ def main(argv=sys.argv[1:]):
 
     args = parser.parse_args(argv)
 
-    input_file = args.input
+    input_files = args.input
     package_name = args.package_name
     cpp_output_dir = args.cpp_output_dir
     idl_output_dir = args.idl_output_dir
     include_dirs = args.include_dir
 
-    input_path = pathlib.Path(input_file)
-    input_dir = input_path.parent
-
     idl_files = []
 
-    if input_file.endswith(".msg") or input_file.endswith(".action") or input_file.endswith(".srv"):
-        idl_files.append(convert_to_idl(input_dir, package_name, input_path.relative_to(input_dir),
-                       pathlib.Path(idl_output_dir)))
-    elif input_file.endswith(".idl"):
-        idl_files.append(input_file)
-    else:
-        print("Wrong file extension")
-        exit(1)
+    for input_file in input_files:
+        input_path = pathlib.Path(input_file)
+        input_dir = input_path.parent
+        if input_file.endswith(".msg") or input_file.endswith(".action") or input_file.endswith(".srv"):
+            idl_files.append(convert_to_idl(input_dir, package_name, input_path.relative_to(input_dir),
+                                            pathlib.Path(idl_output_dir) / package_name))
+        elif input_file.endswith(".idl"):
+            idl_files.append(input_file)
+        else:
+            print("Wrong file extension")
+            exit(1)
 
     type_description_paths = generate_type_description(idl_files, idl_output_dir, package_name,
                                                        collect_include_path_tuples(include_dirs))
@@ -195,10 +195,11 @@ def main(argv=sys.argv[1:]):
 
     generated_sources = []
 
-    generated_sources += generate_c(idl_files, cpp_output_dir, package_name, type_description_map)
-    generated_sources += generate_cpp(idl_files, cpp_output_dir, package_name)
-    generated_sources += generate_cpp_typesupport_introspection(idl_files, cpp_output_dir, package_name)
-    generated_sources += generate_cpp_typesupport_fastrtps(idl_files, cpp_output_dir, package_name)
+    cpp_output_gen_path = os.path.join(cpp_output_dir, package_name)
+    generated_sources += generate_c(idl_files, cpp_output_gen_path, package_name, type_description_map)
+    generated_sources += generate_cpp(idl_files, cpp_output_gen_path, package_name)
+    generated_sources += generate_cpp_typesupport_introspection(idl_files, cpp_output_gen_path, package_name)
+    generated_sources += generate_cpp_typesupport_fastrtps(idl_files, cpp_output_gen_path, package_name)
 
     source_files = []
     for source_file in generated_sources:
@@ -206,6 +207,7 @@ def main(argv=sys.argv[1:]):
             source_file_path = pathlib.Path(source_file)
             cpp_root_path = pathlib.Path(cpp_output_dir)
             source_files.append(str(source_file_path.relative_to(cpp_root_path)))
+
 
 if __name__ == '__main__':
     main()
