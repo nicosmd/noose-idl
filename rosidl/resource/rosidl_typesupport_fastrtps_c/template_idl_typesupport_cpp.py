@@ -1,3 +1,4 @@
+_template = r"""
 // generated from rosidl_typesupport_fastrtps_c/resource/idl__type_support_c.cpp.em
 // with input from @(package_name):@(interface_path)
 // generated code does not contain a copyright notice
@@ -12,7 +13,7 @@
 @#######################################################################
 @
 @{
-from rosidl_pycommon import convert_camel_case_to_lower_case_underscore
+from rosidl.rosidl_pycommon import convert_camel_case_to_lower_case_underscore
 include_parts = [package_name] + list(interface_path.parents[0].parts) + [
     'detail', convert_camel_case_to_lower_case_underscore(interface_path.stem)]
 include_base = '/'.join(include_parts)
@@ -26,7 +27,7 @@ include_directives = set()
 @# Handle message
 @#######################################################################
 @{
-from rosidl_parser.definition import Message
+from rosidl.rosidl_parser.definition import Message
 }@
 @[for message in content.get_elements_of_type(Message)]@
 
@@ -42,7 +43,7 @@ TEMPLATE(
 @# Handle service
 @#######################################################################
 @{
-from rosidl_parser.definition import Service
+from rosidl.rosidl_parser.definition import Service
 }@
 @[for service in content.get_elements_of_type(Service)]@
 
@@ -58,7 +59,7 @@ TEMPLATE(
 @# Handle action
 @#######################################################################
 @{
-from rosidl_parser.definition import Action
+from rosidl.rosidl_parser.definition import Action
 }@
 @[for action in content.get_elements_of_type(Action)]@
 
@@ -104,3 +105,8 @@ TEMPLATE(
     message=action.feedback_message, include_directives=include_directives)
 }@
 @[end for]@
+"""
+
+
+def get_template():
+    return _template

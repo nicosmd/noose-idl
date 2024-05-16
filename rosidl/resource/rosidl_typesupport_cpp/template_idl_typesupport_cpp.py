@@ -1,31 +1,17 @@
-// generated from rosidl_typesupport_introspection_c/resource/idl__rosidl_typesupport_introspection_c.h.em
+_template = r"""
+// generated from rosidl_typesupport_cpp/resource/idl__type_support.cpp.em
 // with input from @(package_name):@(interface_path)
 // generated code does not contain a copyright notice
 @
 @#######################################################################
-@# EmPy template for generating <idl>__rosidl_typesupport_introspection_c.h files
+@# EmPy template for generating <idl>__type_support.c files
 @#
 @# Context:
 @#  - package_name (string)
 @#  - interface_path (Path relative to the directory named after the package)
 @#  - content (IdlContent, list of elements, e.g. Messages or Services)
+@#  - type_supports (list of strings, the names of the type support packages)
 @#######################################################################
-@{
-from rosidl_pycommon import convert_camel_case_to_lower_case_underscore
-include_parts = [package_name] + list(interface_path.parents[0].parts) + [
-    'detail', convert_camel_case_to_lower_case_underscore(interface_path.stem)]
-header_guard_variable = '__'.join([x.upper() for x in include_parts]) + \
-    '__ROSIDL_TYPESUPPORT_INTROSPECTION_C_H_'
-}@
-
-#ifndef @(header_guard_variable)
-#define @(header_guard_variable)
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 @{
 include_directives = set()
 }@
@@ -33,15 +19,15 @@ include_directives = set()
 @# Handle message
 @#######################################################################
 @{
-from rosidl_parser.definition import Message
+from rosidl.rosidl_parser.definition import Message
 }@
 @[for message in content.get_elements_of_type(Message)]@
 
 @{
 TEMPLATE(
-    'msg__rosidl_typesupport_introspection_c.h.em',
+    'msg__type_support.cpp.em',
     package_name=package_name, interface_path=interface_path, message=message,
-    include_directives=include_directives)
+    include_directives=include_directives, type_supports=type_supports)
 }@
 @[end for]@
 @
@@ -49,15 +35,15 @@ TEMPLATE(
 @# Handle service
 @#######################################################################
 @{
-from rosidl_parser.definition import Service
+from rosidl.rosidl_parser.definition import Service
 }@
 @[for service in content.get_elements_of_type(Service)]@
 
 @{
 TEMPLATE(
-    'srv__rosidl_typesupport_introspection_c.h.em',
+    'srv__type_support.cpp.em',
     package_name=package_name, interface_path=interface_path, service=service,
-    include_directives=include_directives)
+    include_directives=include_directives, type_supports=type_supports)
 }@
 @[end for]@
 @
@@ -65,55 +51,61 @@ TEMPLATE(
 @# Handle action
 @#######################################################################
 @{
-from rosidl_parser.definition import Action
+from rosidl.rosidl_parser.definition import Action
 }@
 @[for action in content.get_elements_of_type(Action)]@
 
 @{
 TEMPLATE(
-    'msg__rosidl_typesupport_introspection_c.h.em',
+    'msg__type_support.cpp.em',
     package_name=package_name, interface_path=interface_path, message=action.goal,
-    include_directives=include_directives)
+    include_directives=include_directives, type_supports=type_supports)
 }@
 
 @{
 TEMPLATE(
-    'msg__rosidl_typesupport_introspection_c.h.em',
+    'msg__type_support.cpp.em',
     package_name=package_name, interface_path=interface_path, message=action.result,
-    include_directives=include_directives)
+    include_directives=include_directives, type_supports=type_supports)
 }@
 
 @{
 TEMPLATE(
-    'msg__rosidl_typesupport_introspection_c.h.em',
+    'msg__type_support.cpp.em',
     package_name=package_name, interface_path=interface_path, message=action.feedback,
-    include_directives=include_directives)
+    include_directives=include_directives, type_supports=type_supports)
 }@
 
 @{
 TEMPLATE(
-    'srv__rosidl_typesupport_introspection_c.h.em',
+    'srv__type_support.cpp.em',
     package_name=package_name, interface_path=interface_path, service=action.send_goal_service,
-    include_directives=include_directives)
+    include_directives=include_directives, type_supports=type_supports)
 }@
 
 @{
 TEMPLATE(
-    'srv__rosidl_typesupport_introspection_c.h.em',
+    'srv__type_support.cpp.em',
     package_name=package_name, interface_path=interface_path, service=action.get_result_service,
-    include_directives=include_directives)
+    include_directives=include_directives, type_supports=type_supports)
 }@
 
 @{
 TEMPLATE(
-    'msg__rosidl_typesupport_introspection_c.h.em',
+    'msg__type_support.cpp.em',
     package_name=package_name, interface_path=interface_path, message=action.feedback_message,
+    include_directives=include_directives, type_supports=type_supports)
+}@
+
+@{
+TEMPLATE(
+    'action__type_support.cpp.em',
+    package_name=package_name, interface_path=interface_path, action=action,
     include_directives=include_directives)
 }@
 @[end for]@
+"""
 
-#ifdef __cplusplus
-}
-#endif
 
-#endif  // @(header_guard_variable)
+def get_template():
+    return _template

@@ -1,3 +1,4 @@
+_template = r"""
 @# Included from rosidl_typesupport_fastrtps_c/resource/idl__rosidl_typesupport_fastrtps_c.h.em
 @{
 TEMPLATE(
@@ -49,3 +50,8 @@ ROSIDL_TYPESUPPORT_INTERFACE__SERVICE_SYMBOL_NAME(rosidl_typesupport_fastrtps_c,
 #ifdef __cplusplus
 }
 #endif
+"""
+
+
+def get_template():
+    return _template

@@ -1,3 +1,4 @@
+_template = r"""
 @# Included from rosidl_typesupport_introspection_c/resource/idl__rosidl_typesupport_introspection_c.h.em
 @{
 header_files = [
@@ -19,3 +20,8 @@ header_files = [
 ROSIDL_TYPESUPPORT_INTROSPECTION_C_PUBLIC_@(package_name)
 const rosidl_message_type_support_t *
 ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_introspection_c, @(', '.join([package_name] + list(interface_path.parents[0].parts))), @(message.structure.namespaced_type.name))();
+"""
+
+
+def get_template():
+    return _template

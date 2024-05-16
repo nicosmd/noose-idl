@@ -59,7 +59,7 @@ def generate_files_noose(file_list, mapping, generator_name, package_name, outpu
         type_description_info = None
 
         idl_file_path = pathlib.Path(idl_file_path_string)
-        idl_stem = idl_file_path.stem.lower()
+        idl_stem = convert_camel_case_to_lower_case_underscore(idl_file_path.stem)
         locator = IdlLocator(str(idl_file_path.parent), str(idl_file_path.name))
         rosidl_type_string = idl_file_path.parent.parts[-1]
 

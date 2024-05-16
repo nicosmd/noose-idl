@@ -1,25 +1,26 @@
+_template = r"""
 @# Included from rosidl_typesupport_fastrtps_c/resource/idl__type_support_c.cpp.em
 @{
-from rosidl_generator_c import idl_structure_type_to_c_typename
-from rosidl_generator_type_description import GET_DESCRIPTION_FUNC
-from rosidl_generator_type_description import GET_HASH_FUNC
-from rosidl_generator_type_description import GET_SOURCES_FUNC
-from rosidl_parser.definition import AbstractGenericString
-from rosidl_parser.definition import AbstractNestedType
-from rosidl_parser.definition import AbstractSequence
-from rosidl_parser.definition import AbstractString
-from rosidl_parser.definition import AbstractWString
-from rosidl_parser.definition import ACTION_FEEDBACK_SUFFIX
-from rosidl_parser.definition import ACTION_GOAL_SUFFIX
-from rosidl_parser.definition import ACTION_RESULT_SUFFIX
-from rosidl_parser.definition import SERVICE_EVENT_MESSAGE_SUFFIX
-from rosidl_parser.definition import SERVICE_REQUEST_MESSAGE_SUFFIX
-from rosidl_parser.definition import SERVICE_RESPONSE_MESSAGE_SUFFIX
-from rosidl_parser.definition import Array
-from rosidl_parser.definition import BasicType
-from rosidl_parser.definition import BoundedSequence
-from rosidl_parser.definition import NamespacedType
-from rosidl_pycommon import convert_camel_case_to_lower_case_underscore
+from rosidl.rosidl_generator_c import idl_structure_type_to_c_typename
+from rosidl.rosidl_generator_type_description import GET_DESCRIPTION_FUNC
+from rosidl.rosidl_generator_type_description import GET_HASH_FUNC
+from rosidl.rosidl_generator_type_description import GET_SOURCES_FUNC
+from rosidl.rosidl_parser.definition import AbstractGenericString
+from rosidl.rosidl_parser.definition import AbstractNestedType
+from rosidl.rosidl_parser.definition import AbstractSequence
+from rosidl.rosidl_parser.definition import AbstractString
+from rosidl.rosidl_parser.definition import AbstractWString
+from rosidl.rosidl_parser.definition import ACTION_FEEDBACK_SUFFIX
+from rosidl.rosidl_parser.definition import ACTION_GOAL_SUFFIX
+from rosidl.rosidl_parser.definition import ACTION_RESULT_SUFFIX
+from rosidl.rosidl_parser.definition import SERVICE_EVENT_MESSAGE_SUFFIX
+from rosidl.rosidl_parser.definition import SERVICE_REQUEST_MESSAGE_SUFFIX
+from rosidl.rosidl_parser.definition import SERVICE_RESPONSE_MESSAGE_SUFFIX
+from rosidl.rosidl_parser.definition import Array
+from rosidl.rosidl_parser.definition import BasicType
+from rosidl.rosidl_parser.definition import BoundedSequence
+from rosidl.rosidl_parser.definition import NamespacedType
+from rosidl.rosidl_pycommon import convert_camel_case_to_lower_case_underscore
 
 include_parts = [package_name] + list(interface_path.parents[0].parts) + [
     'detail', convert_camel_case_to_lower_case_underscore(interface_path.stem)]
@@ -208,17 +209,17 @@ using _@(message.structure.namespaced_type.name)__ros_msg_type = @('__'.join(mes
 #   suffix: the suffix name of the method. Will be used in case of recursion
 
 def generate_member_for_cdr_serialize(member, suffix):
-  from rosidl_generator_cpp import msg_type_only_to_cpp
-  from rosidl_generator_cpp import msg_type_to_cpp
-  from rosidl_parser.definition import AbstractGenericString
-  from rosidl_parser.definition import AbstractNestedType
-  from rosidl_parser.definition import AbstractSequence
-  from rosidl_parser.definition import AbstractString
-  from rosidl_parser.definition import AbstractWString
-  from rosidl_parser.definition import Array
-  from rosidl_parser.definition import BasicType
-  from rosidl_parser.definition import BoundedSequence
-  from rosidl_parser.definition import NamespacedType
+  from rosidl.rosidl_generator_cpp import msg_type_only_to_cpp
+  from rosidl.rosidl_generator_cpp import msg_type_to_cpp
+  from rosidl.rosidl_parser.definition import AbstractGenericString
+  from rosidl.rosidl_parser.definition import AbstractNestedType
+  from rosidl.rosidl_parser.definition import AbstractSequence
+  from rosidl.rosidl_parser.definition import AbstractString
+  from rosidl.rosidl_parser.definition import AbstractWString
+  from rosidl.rosidl_parser.definition import Array
+  from rosidl.rosidl_parser.definition import BasicType
+  from rosidl.rosidl_parser.definition import BoundedSequence
+  from rosidl.rosidl_parser.definition import NamespacedType
   strlist = []
   strlist.append('// Field name: %s' % (member.name))
   strlist.append('{')
@@ -463,17 +464,17 @@ else:
 #   suffix: the suffix name of the method. Will be used in case of recursion
 
 def generate_member_for_get_serialized_size(member, suffix):
-  from rosidl_generator_cpp import msg_type_only_to_cpp
-  from rosidl_generator_cpp import msg_type_to_cpp
-  from rosidl_parser.definition import AbstractGenericString
-  from rosidl_parser.definition import AbstractNestedType
-  from rosidl_parser.definition import AbstractSequence
-  from rosidl_parser.definition import AbstractString
-  from rosidl_parser.definition import AbstractWString
-  from rosidl_parser.definition import Array
-  from rosidl_parser.definition import BasicType
-  from rosidl_parser.definition import BoundedSequence
-  from rosidl_parser.definition import NamespacedType
+  from rosidl.rosidl_generator_cpp import msg_type_only_to_cpp
+  from rosidl.rosidl_generator_cpp import msg_type_to_cpp
+  from rosidl.rosidl_parser.definition import AbstractGenericString
+  from rosidl.rosidl_parser.definition import AbstractNestedType
+  from rosidl.rosidl_parser.definition import AbstractSequence
+  from rosidl.rosidl_parser.definition import AbstractString
+  from rosidl.rosidl_parser.definition import AbstractWString
+  from rosidl.rosidl_parser.definition import Array
+  from rosidl.rosidl_parser.definition import BasicType
+  from rosidl.rosidl_parser.definition import BoundedSequence
+  from rosidl.rosidl_parser.definition import NamespacedType
   strlist = []
   strlist.append('// Field name: %s' % (member.name))
   if isinstance(member.type, AbstractNestedType):
@@ -554,17 +555,17 @@ size_t get_serialized_size_@('__'.join([package_name] + list(interface_path.pare
 #   suffix: the suffix name of the method. Will be used in case of recursion
 
 def generate_member_for_max_serialized_size(member, suffix):
-  from rosidl_generator_cpp import msg_type_only_to_cpp
-  from rosidl_generator_cpp import msg_type_to_cpp
-  from rosidl_parser.definition import AbstractGenericString
-  from rosidl_parser.definition import AbstractNestedType
-  from rosidl_parser.definition import AbstractSequence
-  from rosidl_parser.definition import AbstractString
-  from rosidl_parser.definition import AbstractWString
-  from rosidl_parser.definition import Array
-  from rosidl_parser.definition import BasicType
-  from rosidl_parser.definition import BoundedSequence
-  from rosidl_parser.definition import NamespacedType
+  from rosidl.rosidl_generator_cpp import msg_type_only_to_cpp
+  from rosidl.rosidl_generator_cpp import msg_type_to_cpp
+  from rosidl.rosidl_parser.definition import AbstractGenericString
+  from rosidl.rosidl_parser.definition import AbstractNestedType
+  from rosidl.rosidl_parser.definition import AbstractSequence
+  from rosidl.rosidl_parser.definition import AbstractString
+  from rosidl.rosidl_parser.definition import AbstractWString
+  from rosidl.rosidl_parser.definition import Array
+  from rosidl.rosidl_parser.definition import BasicType
+  from rosidl.rosidl_parser.definition import BoundedSequence
+  from rosidl.rosidl_parser.definition import NamespacedType
   strlist = []
   strlist.append('// Field name: %s' % (member.name))
   strlist.append('{')
@@ -909,3 +910,8 @@ ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_fastrtps_c,
 #if defined(__cplusplus)
 }
 #endif
+"""
+
+
+def get_template():
+    return _template

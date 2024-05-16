@@ -13,7 +13,8 @@ import template_cmake
 from rosidl import rosidl_generator_c
 from rosidl import rosidl_generator_cpp
 from rosidl.resource import rosidl_typesupport_introspection_cpp
-
+from rosidl.resource import rosidl_typesupport_cpp
+from rosidl.resource import rosidl_typesupport_c
 
 def convert_rosidl_to_idl(input_dir, package_name, file, output_dir):
     if file.endswith(".msg") or file.endswith(".action") or file.endswith(".srv"):
@@ -44,11 +45,12 @@ def collect_all_idl_files(input_dir, idl_dir):
 
 
 def write_file(path, content):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as f:
         f.write(content)
 
 
-def generate_cpp_typesupport_fastrtps(idl_files, output_dir, package_name):
+def generate_cpp_typesupport_fastrtps_cpp(idl_files, output_dir, package_name):
     mapping = {
         'idl__rosidl_typesupport_fastrtps_cpp.hpp.em':
             'detail/%s__rosidl_typesupport_fastrtps_cpp.hpp',
@@ -60,14 +62,33 @@ def generate_cpp_typesupport_fastrtps(idl_files, output_dir, package_name):
 
     from rosidl.resource.rosidl_typesupport_fastrtps_cpp import template_visibility_control_h
     visibility_file_path = os.path.join(output_dir, "msg", "rosidl_typesupport_fastrtps_cpp__visibility_control.h")
-    write_file(visibility_file_path, template_visibility_control_h.render(package_name, package_name.upper()))
+    write_file(visibility_file_path, template_visibility_control_h.render(package_name.upper(), package_name))
 
     generated_files.append(visibility_file_path)
 
     return generated_files
 
 
-def generate_cpp_typesupport_introspection(idl_files, output_dir, package_name):
+def generate_cpp_typesupport_fastrtps_c(idl_files, output_dir, package_name):
+    mapping = {
+        'idl__rosidl_typesupport_fastrtps_c.h.em':
+            'detail/%s__rosidl_typesupport_fastrtps_c.h',
+        'idl__type_support_c.cpp.em': 'detail/%s__type_support_c.cpp',
+    }
+
+    generated_files = generate_files_noose(idl_files, mapping, "rosidl_typesupport_fastrtps_c", package_name,
+                                           output_dir)
+
+    from rosidl.resource.rosidl_typesupport_fastrtps_c import template_visibility_control_h
+    visibility_file_path = os.path.join(output_dir, "msg", "rosidl_typesupport_fastrtps_c__visibility_control.h")
+    write_file(visibility_file_path, template_visibility_control_h.render(package_name.upper(), package_name))
+
+    generated_files.append(visibility_file_path)
+
+    return generated_files
+
+
+def generate_cpp_typesupport_introspection_cpp(idl_files, output_dir, package_name):
     mapping = {
         'idl__rosidl_typesupport_introspection_cpp.hpp.em':
             'detail/%s__rosidl_typesupport_introspection_cpp.hpp',
@@ -75,6 +96,41 @@ def generate_cpp_typesupport_introspection(idl_files, output_dir, package_name):
     }
 
     return generate_files_noose(idl_files, mapping, "rosidl_typesupport_introspection_cpp", package_name, output_dir)
+
+
+def generate_typesupport_cpp(idl_files, output_dir, package_name):
+    mapping = {
+        'idl__type_support.cpp.em': '%s__type_support.cpp',
+    }
+
+    type_supports = {}
+    return generate_files_noose(idl_files, mapping, "rosidl_typesupport_cpp", package_name, output_dir, additional_context={'type_supports': type_supports})
+
+def generate_typesupport_c(idl_files, output_dir, package_name):
+    mapping = {
+        'idl__type_support.cpp.em': '%s__type_support_c.cpp',
+    }
+
+    type_supports = {}
+    return generate_files_noose(idl_files, mapping, "rosidl_typesupport_c", package_name, output_dir, additional_context={'type_supports': type_supports})
+
+def generate_cpp_typesupport_introspection_c(idl_files, output_dir, package_name):
+    mapping = {
+        'idl__rosidl_typesupport_introspection_c.h.em':
+            'detail/%s__rosidl_typesupport_introspection_c.h',
+        'idl__type_support.c.em': 'detail/%s__type_support_c.c',
+    }
+
+    generated_files = generate_files_noose(idl_files, mapping, "rosidl_typesupport_introspection_c", package_name,
+                                           output_dir)
+
+    from rosidl.resource.rosidl_typesupport_introspection_c import template_visibility_control_h
+    visibility_file_path = os.path.join(output_dir, "msg", "rosidl_typesupport_introspection_c__visibility_control.h")
+    write_file(visibility_file_path, template_visibility_control_h.render(package_name.upper(), package_name))
+
+    generated_files.append(visibility_file_path)
+
+    return generated_files
 
 
 def generate_cpp(idl_files, output_dir, package_name):
@@ -86,14 +142,14 @@ def generate_cpp(idl_files, output_dir, package_name):
         'idl__type_support.hpp.em': 'detail/%s__type_support.hpp',
     }
 
-    generate_files = generate_files_noose(idl_files, mapping, "rosidl_generator_cpp", package_name, output_dir)
+    generated_files = generate_files_noose(idl_files, mapping, "rosidl_generator_cpp", package_name, output_dir)
     from rosidl.resource.rosidl_generator_cpp import template_visibility_control_hpp
     visibility_file_path = os.path.join(output_dir, "msg", "rosidl_generator_cpp__visibility_control.hpp")
-    write_file(visibility_file_path, template_visibility_control_hpp.render(package_name, package_name.upper()))
+    write_file(visibility_file_path, template_visibility_control_hpp.render(package_name.upper(), package_name))
 
-    generate_files.append(visibility_file_path)
+    generated_files.append(visibility_file_path)
 
-    return generate_files
+    return generated_files
 
 
 def generate_c(idl_files, output_dir, package_name, type_description_map):
@@ -115,7 +171,7 @@ def generate_c(idl_files, output_dir, package_name, type_description_map):
 
     from rosidl.resource.rosidl_generator_c import template_visibility_control_h
     visibility_file_path = os.path.join(output_dir, "msg", "rosidl_generator_c__visibility_control.h")
-    write_file(visibility_file_path, template_visibility_control_h.render(package_name, package_name.upper()))
+    write_file(visibility_file_path, template_visibility_control_h.render(package_name.upper(), package_name))
 
     generate_files.append(visibility_file_path)
 
@@ -198,8 +254,12 @@ def main(argv=sys.argv[1:]):
     cpp_output_gen_path = os.path.join(cpp_output_dir, package_name)
     generated_sources += generate_c(idl_files, cpp_output_gen_path, package_name, type_description_map)
     generated_sources += generate_cpp(idl_files, cpp_output_gen_path, package_name)
-    generated_sources += generate_cpp_typesupport_introspection(idl_files, cpp_output_gen_path, package_name)
-    generated_sources += generate_cpp_typesupport_fastrtps(idl_files, cpp_output_gen_path, package_name)
+    generated_sources += generate_cpp_typesupport_introspection_cpp(idl_files, cpp_output_gen_path, package_name)
+    # generated_sources += generate_cpp_typesupport_introspection_c(idl_files, cpp_output_gen_path, package_name)
+    generated_sources += generate_cpp_typesupport_fastrtps_cpp(idl_files, cpp_output_gen_path, package_name)
+    # generated_sources += generate_cpp_typesupport_fastrtps_c(idl_files, cpp_output_gen_path, package_name)
+    generated_sources += generate_typesupport_cpp(idl_files, cpp_output_gen_path, package_name)
+    generated_sources += generate_typesupport_c(idl_files, cpp_output_gen_path, package_name)
 
     source_files = []
     for source_file in generated_sources:

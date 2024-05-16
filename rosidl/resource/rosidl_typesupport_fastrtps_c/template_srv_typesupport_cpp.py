@@ -1,3 +1,4 @@
+_template = r"""
 @# Included from rosidl_typesupport_fastrtps_c/resource/idl__type_support_c.cpp.em
 @{
 TEMPLATE(
@@ -21,14 +22,14 @@ TEMPLATE(
 }@
 
 @{
-from rosidl_generator_c import idl_structure_type_to_c_typename
-from rosidl_generator_type_description import GET_DESCRIPTION_FUNC
-from rosidl_generator_type_description import GET_HASH_FUNC
-from rosidl_generator_type_description import GET_SOURCES_FUNC
-from rosidl_parser.definition import SERVICE_EVENT_MESSAGE_SUFFIX
-from rosidl_parser.definition import SERVICE_REQUEST_MESSAGE_SUFFIX
-from rosidl_parser.definition import SERVICE_RESPONSE_MESSAGE_SUFFIX
-from rosidl_pycommon import convert_camel_case_to_lower_case_underscore
+from rosidl.rosidl_generator_c import idl_structure_type_to_c_typename
+from rosidl.rosidl_generator_type_description import GET_DESCRIPTION_FUNC
+from rosidl.rosidl_generator_type_description import GET_HASH_FUNC
+from rosidl.rosidl_generator_type_description import GET_SOURCES_FUNC
+from rosidl.rosidl_parser.definition import SERVICE_EVENT_MESSAGE_SUFFIX
+from rosidl.rosidl_parser.definition import SERVICE_REQUEST_MESSAGE_SUFFIX
+from rosidl.rosidl_parser.definition import SERVICE_RESPONSE_MESSAGE_SUFFIX
+from rosidl.rosidl_pycommon import convert_camel_case_to_lower_case_underscore
 
 include_parts = [package_name] + list(interface_path.parents[0].parts) + \
     [convert_camel_case_to_lower_case_underscore(interface_path.stem)]
@@ -93,3 +94,8 @@ ROSIDL_TYPESUPPORT_INTERFACE__SERVICE_SYMBOL_NAME(rosidl_typesupport_fastrtps_c,
 #if defined(__cplusplus)
 }
 #endif
+"""
+
+
+def get_template():
+    return _template

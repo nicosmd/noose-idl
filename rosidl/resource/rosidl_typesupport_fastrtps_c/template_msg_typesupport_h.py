@@ -1,7 +1,8 @@
+_template = r"""
 @# Included from rosidl_typesupport_fastrtps_c/resource/idl__rosidl_typesupport_fastrtps_c.h.em
 @{
 
-from rosidl_pycommon import convert_camel_case_to_lower_case_underscore
+from rosidl.rosidl_pycommon import convert_camel_case_to_lower_case_underscore
 
 include_parts = [package_name] + list(interface_path.parents[0].parts) + [
     'detail', convert_camel_case_to_lower_case_underscore(interface_path.stem)]
@@ -79,3 +80,7 @@ ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(rosidl_typesupport_fastrtps_c,
 #ifdef __cplusplus
 }
 #endif
+"""
+
+def get_template():
+    return _template
