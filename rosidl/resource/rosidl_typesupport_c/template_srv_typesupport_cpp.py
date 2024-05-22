@@ -103,13 +103,13 @@ static const _@(service.namespaced_type.name)_type_support_symbol_names_t _@(ser
 
 typedef struct _@(service.namespaced_type.name)_type_support_data_t
 {
-  void * data[@(len(type_supports))];
+  const rosidl_service_type_support_t * (*data[@(len(type_supports))])();
 } _@(service.namespaced_type.name)_type_support_data_t;
 
 static _@(service.namespaced_type.name)_type_support_data_t _@(service.namespaced_type.name)_service_typesupport_data = {
   {
 @[for type_support in sorted(type_supports)]@
-    0,  // will store the shared library later
+    ROSIDL_TYPESUPPORT_INTERFACE__SERVICE_SYMBOL_NAME(@(type_support), @(', '.join([package_name] + list(interface_path.parents[0].parts))), @(service.namespaced_type.name)),
 @[end for]@
   }
 };
@@ -119,7 +119,7 @@ static const type_support_map_t _@(service.namespaced_type.name)_service_typesup
   "@(package_name)",
   &_@(service.namespaced_type.name)_service_typesupport_ids.typesupport_identifier[0],
   &_@(service.namespaced_type.name)_service_typesupport_symbol_names.symbol_name[0],
-  &_@(service.namespaced_type.name)_service_typesupport_data.data[0],
+  _@(service.namespaced_type.name)_service_typesupport_data.data[0],
 };
 
 static const rosidl_service_type_support_t @(service.namespaced_type.name)_service_type_support_handle = {

@@ -103,7 +103,7 @@ def generate_typesupport_cpp(idl_files, output_dir, package_name):
         'idl__type_support.cpp.em': '%s__type_support.cpp',
     }
 
-    type_supports = {}
+    type_supports = ['rosidl_typesupport_fastrtps_cpp', 'rosidl_typesupport_introspection_cpp']
     return generate_files_noose(idl_files, mapping, "rosidl_typesupport_cpp", package_name, output_dir, additional_context={'type_supports': type_supports})
 
 def generate_typesupport_c(idl_files, output_dir, package_name):

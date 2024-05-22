@@ -15,6 +15,8 @@ header_files = [
     'rosidl_runtime_c/message_type_support_struct.h',
     include_base + '__functions.h',
     include_base + '__struct.hpp',
+    include_base + '__rosidl_typesupport_fastrtps_cpp.hpp"',
+    include_base + '__rosidl_typesupport_introspection_cpp.hpp"',
 ]
 if len(type_supports) != 1:
     header_files.append('rosidl_typesupport_cpp/identifier.hpp')
@@ -80,13 +82,13 @@ static const _@(message.structure.namespaced_type.name)_type_support_symbol_name
 
 typedef struct _@(message.structure.namespaced_type.name)_type_support_data_t
 {
-  void * data[@(len(type_supports))];
+  const rosidl_message_type_support_t * (*data[@(len(type_supports))])();
 } _@(message.structure.namespaced_type.name)_type_support_data_t;
 
 static _@(message.structure.namespaced_type.name)_type_support_data_t _@(message.structure.namespaced_type.name)_message_typesupport_data = {
   {
 @[for type_support in sorted(type_supports)]@
-    0,  // will store the shared library later
+    &ROSIDL_TYPESUPPORT_INTERFACE__MESSAGE_SYMBOL_NAME(@(type_support), @(', '.join([package_name] + list(interface_path.parents[0].parts))), @(message.structure.namespaced_type.name)),
 @[end for]@
   }
 };
@@ -96,7 +98,10 @@ static const type_support_map_t _@(message.structure.namespaced_type.name)_messa
   "@(package_name)",
   &_@(message.structure.namespaced_type.name)_message_typesupport_ids.typesupport_identifier[0],
   &_@(message.structure.namespaced_type.name)_message_typesupport_symbol_names.symbol_name[0],
-  &_@(message.structure.namespaced_type.name)_message_typesupport_data.data[0],
+  {
+  _@(message.structure.namespaced_type.name)_message_typesupport_data.data[0],
+  _@(message.structure.namespaced_type.name)_message_typesupport_data.data[1],
+  }
 };
 
 static const rosidl_message_type_support_t @(message.structure.namespaced_type.name)_message_type_support_handle = {
