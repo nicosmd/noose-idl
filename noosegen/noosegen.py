@@ -73,7 +73,7 @@ def generate_cpp_typesupport_fastrtps_c(idl_files, output_dir, package_name):
     mapping = {
         'idl__rosidl_typesupport_fastrtps_c.h.em':
             'detail/%s__rosidl_typesupport_fastrtps_c.h',
-        'idl__type_support_c.cpp.em': 'detail/%s__type_support_c.cpp',
+        'idl__type_support_c.cpp.em': 'detail/dds_fastrtps/%s__type_support_c.cpp',
     }
 
     generated_files = generate_files_noose(idl_files, mapping, "rosidl_typesupport_fastrtps_c", package_name,
@@ -111,7 +111,7 @@ def generate_typesupport_c(idl_files, output_dir, package_name):
         'idl__type_support.cpp.em': '%s__type_support_c.cpp',
     }
 
-    type_supports = {}
+    type_supports = ['rosidl_typesupport_fastrtps_c', 'rosidl_typesupport_introspection_c']
     return generate_files_noose(idl_files, mapping, "rosidl_typesupport_c", package_name, output_dir, additional_context={'type_supports': type_supports})
 
 def generate_cpp_typesupport_introspection_c(idl_files, output_dir, package_name):
@@ -255,9 +255,9 @@ def main(argv=sys.argv[1:]):
     generated_sources += generate_c(idl_files, cpp_output_gen_path, package_name, type_description_map)
     generated_sources += generate_cpp(idl_files, cpp_output_gen_path, package_name)
     generated_sources += generate_cpp_typesupport_introspection_cpp(idl_files, cpp_output_gen_path, package_name)
-    # generated_sources += generate_cpp_typesupport_introspection_c(idl_files, cpp_output_gen_path, package_name)
+    generated_sources += generate_cpp_typesupport_introspection_c(idl_files, cpp_output_gen_path, package_name)
     generated_sources += generate_cpp_typesupport_fastrtps_cpp(idl_files, cpp_output_gen_path, package_name)
-    # generated_sources += generate_cpp_typesupport_fastrtps_c(idl_files, cpp_output_gen_path, package_name)
+    generated_sources += generate_cpp_typesupport_fastrtps_c(idl_files, cpp_output_gen_path, package_name)
     generated_sources += generate_typesupport_cpp(idl_files, cpp_output_gen_path, package_name)
     generated_sources += generate_typesupport_c(idl_files, cpp_output_gen_path, package_name)
 

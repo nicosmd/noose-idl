@@ -16,6 +16,8 @@ header_files = [
     include_base + '__struct.h',
     include_base + '__type_support.h',
     include_base + '__functions.h',
+    include_base + '__rosidl_typesupport_fastrtps_c.h',
+    include_base + '__rosidl_typesupport_introspection_c.h',
 ]
 if len(type_supports) != 1:
     header_files += [
@@ -95,7 +97,10 @@ static const type_support_map_t _@(message.structure.namespaced_type.name)_messa
   "@(package_name)",
   &_@(message.structure.namespaced_type.name)_message_typesupport_ids.typesupport_identifier[0],
   &_@(message.structure.namespaced_type.name)_message_typesupport_symbol_names.symbol_name[0],
+  {
   _@(message.structure.namespaced_type.name)_message_typesupport_data.data[0],
+  _@(message.structure.namespaced_type.name)_message_typesupport_data.data[1],
+  }
 };
 
 static const rosidl_message_type_support_t @(message.structure.namespaced_type.name)_message_type_support_handle = {
